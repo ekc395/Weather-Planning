@@ -39,10 +39,7 @@ function AppContent() {
       <ViewDropdown viewType={viewType} onViewChange={setViewType} />
       <SignOutButton />
 
-      <div className="
-        flex flex-col-reverse md:flex-row gap-5 flex-1 mx-2
-        md:mx-10"
-      >
+      <div className="flex flex-col-reverse md:flex-row gap-5 flex-1 mx-2 md:mx-10">
         <div className="flex flex-col-reverse md:flex-col w-full md:w-60 gap-3">
           <NewEventButton />
           <PlannedEvents />

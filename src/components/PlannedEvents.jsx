@@ -7,12 +7,6 @@ import { weatherService } from "../utils/weatherService";
 import ModifyEvent from "./ModifyEvent";
 import Alert from "./Alert";
 
-// Helper function to create a local date from a date string
-const createLocalDate = (dateString) => {
-  const [year, month, day] = dateString.split('-').map(Number);
-  return new Date(year, month - 1, day); // month is 0-indexed
-};
-
 function PlannedEvents() {
   const { events, addEvent, removeEvent } = useEvents();
   const [selectedEvent, setSelectedEvent] = useState(null);

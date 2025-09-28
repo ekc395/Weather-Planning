@@ -5,18 +5,15 @@ import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getDatabase } from 'firebase/database';
 
-// Your Firebase configuration object
-// TODO: Replace these values with your actual Firebase config from the Firebase Console
-// Go to Project Settings > General > Your apps > Firebase SDK snippet > Config
 const firebaseConfig = {
-  apiKey: "AIzaSyDu65WNUOHMcOeZZX-ObP4NlhcIswY3np0",
-  authDomain: "weather-planner-c28aa.firebaseapp.com",
-  databaseURL: "https://weather-planner-c28aa-default-rtdb.firebaseio.com",
-  projectId: "weather-planner-c28aa",
-  storageBucket: "weather-planner-c28aa.firebasestorage.app",
-  messagingSenderId: "527263540871",
-  appId: "1:527263540871:web:452921c846bc8203e67a22",
-  measurementId: "G-66EY707HWP"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase
