@@ -65,4 +65,4 @@ function Alert({ message, type = 'info', onClose, onConfirm, onCancel, showConfi
   );
 }
 
-export default Alert; 
+export default Alert;
