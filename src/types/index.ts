@@ -96,16 +96,16 @@ export interface User {
     clearError: () => void;
   }
   
-  export interface EventsContextType {
-    events: Event[];
-    loading: boolean;
-    error: string | null;
-    addEvent: (eventData: NewEventData) => Promise<void>;
-    updateEvent: (eventId: string, eventData: Partial<NewEventData>) => Promise<void>;
-    deleteEvent: (eventId: string) => Promise<void>;
-    getEventsByDateRange: (startDate: string, endDate: string) => Event[];
-    clearError: () => void;
-  }
+export interface EventsContextType {
+  events: Event[];
+  loading: boolean;
+  error: string | null;
+  addEvent: (eventData: NewEventData) => Promise<{ success: boolean; error?: string }>;
+  updateEvent: (eventId: string, eventData: Partial<NewEventData>) => Promise<{ success: boolean; error?: string }>;
+  deleteEvent: (eventId: string) => Promise<{ success: boolean; error?: string }>;
+  getEventsByDateRange: (startDate: string, endDate: string) => Event[];
+  clearError: () => void;
+}
   
   // Component Props Types
   export interface CalendarProps {

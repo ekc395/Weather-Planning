@@ -1,9 +1,11 @@
 // OpenMeteo API weather service
+import { WeatherData, HourlyWeatherData, WeatherCondition, TemperatureRange, BestEventDate, Location } from '../types';
+
 const OPENMETEO_BASE_URL = 'https://api.open-meteo.com/v1/forecast';
 const GEOCODING_BASE_URL = 'https://geocoding-api.open-meteo.com/v1/search';
 
 // Weather code mappings from OpenMeteo
-const WEATHER_CODES = {
+const WEATHER_CODES: Record<number, WeatherCondition> = {
   0: 'sunny',
   1: 'sunny', // Mainly clear
   2: 'cloudy', // Partly cloudy
@@ -25,28 +27,53 @@ const WEATHER_CODES = {
 };
 
 // Convert Celsius to Fahrenheit
-const celsiusToFahrenheit = (celsius) => {
+const celsiusToFahrenheit = (celsius: number): number => {
   return (celsius * 9/5) + 32;
 };
 
 // Temperature ranges (in Fahrenheit)
-const TEMPERATURE_RANGES = {
+const TEMPERATURE_RANGES: Record<TemperatureRange, (temp: number) => boolean> = {
   cold: (temp) => temp < 50,    // Below 50°F (10°C)
   cool: (temp) => temp >= 50 && temp < 68,   // 50-67°F (10-19°C)
   warm: (temp) => temp >= 68 && temp < 86,   // 68-85°F (20-29°C)
   hot: (temp) => temp >= 86     // 86°F+ (30°C+)
 };
 
+interface OpenMeteoResponse {
+  daily: {
+    time: string[];
+    weather_code: number[];
+    temperature_2m_max: number[];
+    temperature_2m_min: number[];
+  };
+  hourly: {
+    time: string[];
+    weather_code: number[];
+    temperature_2m: number[];
+  };
+}
+
+interface GeocodingResponse {
+  results: Array<{
+    latitude: number;
+    longitude: number;
+    name: string;
+    country: string;
+  }>;
+}
+
+interface TimeSlot {
+  startTime: string;
+  endTime: string;
+  weatherCondition: WeatherCondition;
+  avgTemperature: number;
+}
+
 export const weatherService = {
   /**
    * Get weather forecast for a location and date range
-   * @param {number} latitude 
-   * @param {number} longitude 
-   * @param {string} startDate - YYYY-MM-DD format
-   * @param {string} endDate - YYYY-MM-DD format
-   * @returns {Promise<Array>} Weather data for each day
    */
-  async getWeatherForecast(latitude, longitude, startDate, endDate) {
+  async getWeatherForecast(latitude: number, longitude: number, startDate: string, endDate: string): Promise<WeatherData[]> {
     try {
       const params = new URLSearchParams({
         latitude: latitude.toString(),
@@ -64,7 +91,7 @@ export const weatherService = {
         throw new Error(`Weather API error: ${response.status}`);
       }
 
-      const data = await response.json();
+      const data: OpenMeteoResponse = await response.json();
       return this.parseWeatherData(data);
     } catch (error) {
       console.error('Error fetching weather data:', error);
@@ -74,10 +101,8 @@ export const weatherService = {
 
   /**
    * Parse OpenMeteo response into our format
-   * @param {Object} data - OpenMeteo API response
-   * @returns {Array} Parsed weather data
    */
-  parseWeatherData(data) {
+  parseWeatherData(data: OpenMeteoResponse): WeatherData[] {
     const { daily, hourly } = data;
     
     return daily.time.map((date, index) => ({
@@ -93,11 +118,8 @@ export const weatherService = {
 
   /**
    * Extract hourly data for a specific date
-   * @param {Object} hourly - Hourly weather data
-   * @param {string} targetDate - Date to extract data for
-   * @returns {Array} Hourly weather data for the date
    */
-  getHourlyDataForDate(hourly, targetDate) {
+  getHourlyDataForDate(hourly: OpenMeteoResponse['hourly'], targetDate: string): HourlyWeatherData[] {
     return hourly.time
       .map((time, index) => ({
         time,
@@ -110,14 +132,14 @@ export const weatherService = {
 
   /**
    * Find the best date for an event based on weather preferences
-   * @param {Array} weatherData - Array of daily weather data
-   * @param {string|Array} preferredWeather - Desired weather condition(s)
-   * @param {string|null} preferredTempRange - Desired temperature range (ignored if null)
-   * @param {string} preferredStartTime - Preferred start time (optional)
-   * @param {string} preferredEndTime - Preferred end time (optional)
-   * @returns {Object|null} Best matching date/time or null if not found
    */
-  findBestEventDate(weatherData, preferredWeather, preferredTempRange, preferredStartTime = null, preferredEndTime = null) {
+  findBestEventDate(
+    weatherData: WeatherData[], 
+    preferredWeather: WeatherCondition | WeatherCondition[], 
+    preferredTempRange: TemperatureRange | null, 
+    preferredStartTime: string | null = null, 
+    preferredEndTime: string | null = null
+  ): BestEventDate | null {
     // Handle both single condition (string) and multiple conditions (array)
     const weatherConditions = Array.isArray(preferredWeather) ? preferredWeather : [preferredWeather];
     
@@ -161,13 +183,13 @@ export const weatherService = {
 
   /**
    * Find the best hour within a day
-   * @param {Array} hourlyData - Hourly weather data for a day
-   * @param {string|Array} preferredWeather - Desired weather condition(s)
-   * @param {string|null} preferredTempRange - Desired temperature range (ignored if null)
-   * @param {number} preferredHour - Preferred hour (0-23)
-   * @returns {Object|null} Best hour or null
    */
-  findBestHourInDay(hourlyData, preferredWeather, preferredTempRange, preferredHour) {
+  findBestHourInDay(
+    hourlyData: HourlyWeatherData[], 
+    preferredWeather: WeatherCondition | WeatherCondition[], 
+    preferredTempRange: TemperatureRange | null, 
+    preferredHour: number
+  ): HourlyWeatherData | null {
     // Handle both single condition (string) and multiple conditions (array)
     const weatherConditions = Array.isArray(preferredWeather) ? preferredWeather : [preferredWeather];
     
@@ -186,14 +208,13 @@ export const weatherService = {
     return hourlyData.find(hour => {
       const tempMatches = preferredTempRange ? TEMPERATURE_RANGES[preferredTempRange]?.(hour.temperature) : true;
       return weatherConditions.includes(hour.weatherCondition) && tempMatches;
-    });
+    }) || null;
   },
 
   /**
    * Get user's current location
-   * @returns {Promise<{latitude: number, longitude: number}>}
    */
-  async getCurrentLocation() {
+  async getCurrentLocation(): Promise<Location> {
     return new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
         reject(new Error('Geolocation is not supported'));
@@ -221,17 +242,15 @@ export const weatherService = {
 
   /**
    * Geocode a location name to get coordinates
-   * @param {string} locationName - Location name (e.g., "New York, NY")
-   * @returns {Promise<{latitude: number, longitude: number}>}
    */
-  async geocodeLocation(locationName) {
+  async geocodeLocation(locationName: string): Promise<Location> {
     try {
       // Extract just the city name for the API call
       const cityName = locationName.split(',')[0].trim();
       
       const params = new URLSearchParams({
         name: cityName,
-        count: 1,
+        count: '1',
         language: 'en',
         format: 'json'
       });
@@ -242,7 +261,7 @@ export const weatherService = {
         throw new Error(`Geocoding API error: ${response.status}`);
       }
 
-      const data = await response.json();
+      const data: GeocodingResponse = await response.json();
       
       if (!data.results || data.results.length === 0) {
         throw new Error(`Location "${locationName}" not found`);
@@ -263,14 +282,14 @@ export const weatherService = {
 
   /**
    * Find the best time slot within a day
-   * @param {Array} hourlyData - Hourly weather data for a day
-   * @param {string|Array} preferredWeather - Desired weather condition(s)
-   * @param {string|null} preferredTempRange - Desired temperature range (ignored if null)
-   * @param {string} preferredStartTime - Preferred start time (HH:MM)
-   * @param {string} preferredEndTime - Preferred end time (HH:MM)
-   * @returns {Object|null} Best time slot or null
    */
-  findBestTimeSlotInDay(hourlyData, preferredWeather, preferredTempRange, preferredStartTime, preferredEndTime) {
+  findBestTimeSlotInDay(
+    hourlyData: HourlyWeatherData[], 
+    preferredWeather: WeatherCondition | WeatherCondition[], 
+    preferredTempRange: TemperatureRange | null, 
+    preferredStartTime: string, 
+    preferredEndTime: string
+  ): TimeSlot | null {
     // Handle both single condition (string) and multiple conditions (array)
     const weatherConditions = Array.isArray(preferredWeather) ? preferredWeather : [preferredWeather];
     
@@ -336,4 +355,4 @@ export const weatherService = {
 
     return null;
   }
-}; 
+};

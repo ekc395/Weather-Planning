@@ -1,12 +1,13 @@
 // AuthContext for managing user authentication state
 // Created by: Kris Tong, Ethan Chen, Emily Kim
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { authService } from '../services/authService';
+import { AuthContextType, User, AuthResult } from '../types';
 
-const AuthContext = createContext();
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const useAuth = () => {
+export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
@@ -14,10 +15,14 @@ export const useAuth = () => {
   return context;
 };
 
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // Listen to authentication state changes
@@ -30,53 +35,53 @@ export const AuthProvider = ({ children }) => {
     return () => unsubscribe();
   }, []);
 
-  const signUp = async (email, password, displayName) => {
+  const signUp = async (email: string, password: string, displayName: string): Promise<AuthResult> => {
     setLoading(true);
     setError(null);
     
     const result = await authService.signUp(email, password, displayName);
     
     if (!result.success) {
-      setError(result.error);
+      setError(result.error || 'Sign up failed');
     }
     
     setLoading(false);
     return result;
   };
 
-  const signIn = async (email, password) => {
+  const signIn = async (email: string, password: string): Promise<AuthResult> => {
     setLoading(true);
     setError(null);
     
     const result = await authService.signIn(email, password);
     
     if (!result.success) {
-      setError(result.error);
+      setError(result.error || 'Sign in failed');
     }
     
     setLoading(false);
     return result;
   };
 
-  const signOut = async () => {
+  const signOut = async (): Promise<AuthResult> => {
     setLoading(true);
     setError(null);
     
     const result = await authService.signOut();
     
     if (!result.success) {
-      setError(result.error);
+      setError(result.error || 'Sign out failed');
     }
     
     setLoading(false);
     return result;
   };
 
-  const clearError = () => {
+  const clearError = (): void => {
     setError(null);
   };
 
-  const value = {
+  const value: AuthContextType = {
     user,
     loading,
     error,
@@ -91,4 +96,4 @@ export const AuthProvider = ({ children }) => {
       {children}
     </AuthContext.Provider>
   );
-}; 
+};
