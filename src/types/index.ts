@@ -134,6 +134,9 @@ export interface EventsContextType {
     onClose?: () => void;
     autoClose?: boolean;
     duration?: number;
+    onConfirm?: () => void;
+    onCancel?: () => void;
+    showConfirm?: boolean;
   }
   
   export interface LoginProps {

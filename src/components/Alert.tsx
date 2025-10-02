@@ -1,29 +1,29 @@
 // Alert component for displaying the alert messages.
-// Created by: Kris Tong, Ethan Chen, Emily Kim
+// Created by: Ethan Chen
 
-import React from 'react';
+import { AlertProps } from '../types';
 
-function Alert({ message, type = 'info', onClose, onConfirm, onCancel, showConfirm = false }) {
-  const bgColor = {
+function Alert({ message, type = 'info', onClose, onConfirm, onCancel, showConfirm = false }: AlertProps) {
+  const bgColor: Record<string, string> = {
     success: 'bg-green-50 border-green-200',
     error: 'bg-red-50 border-red-200',
     info: 'bg-blue-50 border-blue-200',
     warning: 'bg-yellow-50 border-yellow-200'
-  }[type];
+  };
 
-  const textColor = {
+  const textColor: Record<string, string> = {
     success: 'text-green-800',
     error: 'text-red-800',
     info: 'text-blue-800',
     warning: 'text-yellow-800'
-  }[type];
+  };
 
-  const buttonColor = {
+  const buttonColor: Record<string, string> = {
     success: 'bg-green-600 hover:bg-green-700',
     error: 'bg-red-600 hover:bg-red-700',
     info: 'bg-blue-600 hover:bg-blue-700',
     warning: 'bg-yellow-600 hover:bg-yellow-700'
-  }[type];
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
