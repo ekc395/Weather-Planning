@@ -1,7 +1,7 @@
 // Popup component for displaying the pop-up pages.
-// Created by: Kris Tong, Ethan Chen, Emily Kim
+// Created by: Ethan Chen
 
-import React from "react";
+import { PopupProps } from "@/types";
 
 function Popup({ 
   isOpen, 
@@ -10,7 +10,7 @@ function Popup({
   children, 
   maxWidth = "max-w-2xl",
   maxHeight = "max-h-[90vh]" 
-}) {
+}: PopupProps) {
   if (!isOpen) return null;
 
   return (

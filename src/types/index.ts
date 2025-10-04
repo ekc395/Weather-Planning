@@ -170,6 +170,8 @@ export interface EventsContextType {
     title: string;
     children: React.ReactNode;
     className?: string;
+    maxWidth: any;
+    maxHeight: any;
   }
   
   export interface NewEventProps {
