@@ -22,7 +22,7 @@ interface DatabaseResult {
 }
 
 export const databaseService = {
-  // Add new event to user's events
+
   addEvent: async (userId: string, eventData: NewEventData): Promise<DatabaseResult> => {
     try {
       const eventsRef = ref(database, `users/${userId}/events`);
@@ -34,7 +34,6 @@ export const databaseService = {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
-      
       await set(newEventRef, eventWithId);
       return { success: true, eventId: newEventRef.key || undefined };
     } catch (error: any) {
@@ -43,7 +42,6 @@ export const databaseService = {
     }
   },
 
-  // Update existing event
   updateEvent: async (userId: string, eventId: string, updateData: Partial<NewEventData>): Promise<DatabaseResult> => {
     try {
       const eventRef = ref(database, `users/${userId}/events/${eventId}`);
@@ -51,7 +49,6 @@ export const databaseService = {
         ...updateData,
         updatedAt: new Date().toISOString()
       };
-      
       await update(eventRef, updatedData);
       return { success: true };
     } catch (error: any) {
@@ -60,7 +57,6 @@ export const databaseService = {
     }
   },
 
-  // Remove event
   removeEvent: async (userId: string, eventId: string): Promise<DatabaseResult> => {
     try {
       const eventRef = ref(database, `users/${userId}/events/${eventId}`);
@@ -72,15 +68,12 @@ export const databaseService = {
     }
   },
 
-  // Get all events for a user (one-time read)
   getUserEvents: async (userId: string): Promise<DatabaseResult> => {
     try {
       const eventsRef = ref(database, `users/${userId}/events`);
       const snapshot = await get(eventsRef);
-      
       if (snapshot.exists()) {
         const eventsData = snapshot.val();
-        // Convert object to array and ensure each event has an id
         const eventsArray: Event[] = Object.keys(eventsData).map(key => ({
           ...eventsData[key],
           id: key
@@ -95,14 +88,11 @@ export const databaseService = {
     }
   },
 
-  // Listen to real-time updates for user events
   subscribeToUserEvents: (userId: string, callback: (events: Event[]) => void) => {
     const eventsRef = ref(database, `users/${userId}/events`);
-    
     const unsubscribe = onValue(eventsRef, (snapshot) => {
       if (snapshot.exists()) {
         const eventsData = snapshot.val();
-        // Convert object to array and ensure each event has an id
         const eventsArray: Event[] = Object.keys(eventsData).map(key => ({
           ...eventsData[key],
           id: key
@@ -115,11 +105,9 @@ export const databaseService = {
       console.error('Error in real-time listener:', error);
       callback([]);
     });
-
     return unsubscribe;
   },
 
-  // Save user profile data
   saveUserProfile: async (userId: string, profileData: any): Promise<DatabaseResult> => {
     try {
       const userRef = ref(database, `users/${userId}/profile`);
@@ -127,7 +115,6 @@ export const databaseService = {
         ...profileData,
         updatedAt: new Date().toISOString()
       };
-      
       await set(userRef, profile);
       return { success: true };
     } catch (error: any) {
@@ -136,12 +123,10 @@ export const databaseService = {
     }
   },
 
-  // Get user profile data
   getUserProfile: async (userId: string): Promise<DatabaseResult> => {
     try {
       const userRef = ref(database, `users/${userId}/profile`);
       const snapshot = await get(userRef);
-      
       if (snapshot.exists()) {
         return { success: true, profile: snapshot.val() };
       } else {

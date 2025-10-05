@@ -1,4 +1,3 @@
-// User and Authentication Types
 export interface User {
     uid: string;
     email: string | null;
@@ -11,7 +10,6 @@ export interface User {
     error?: string;
   }
   
-  // Weather Types
   export interface WeatherData {
     date: string;
     weatherCode: number;
@@ -50,7 +48,6 @@ export interface User {
     confidence: 'high' | 'medium' | 'low';
   }
   
-  // Event Types
   export interface Event {
     id: string;
     title: string;
@@ -77,7 +74,6 @@ export interface User {
     temperaturePreference?: TemperatureRange;
   }
   
-  // Location Types
   export interface Location {
     latitude: number;
     longitude: number;
@@ -85,7 +81,6 @@ export interface User {
     country?: string;
   }
   
-  // Context Types
   export interface AuthContextType {
     user: User | null;
     loading: boolean;
@@ -96,7 +91,7 @@ export interface User {
     clearError: () => void;
   }
   
-export interface EventsContextType {
+  export interface EventsContextType {
   events: Event[];
   loading: boolean;
   error: string | null;
@@ -105,9 +100,8 @@ export interface EventsContextType {
   deleteEvent: (eventId: string) => Promise<{ success: boolean; error?: string }>;
   getEventsByDateRange: (startDate: string, endDate: string) => Event[];
   clearError: () => void;
-}
+  }
   
-  // Component Props Types
   export interface CalendarProps {
     defaultView: 'week' | 'month';
     onViewChange: (view: 'week' | 'month') => void;
@@ -193,7 +187,6 @@ export interface EventsContextType {
     onEventCreated?: (event: Event) => void;
   }
   
-  // Month and Week View Types
   export interface MonthViewProps {
     selectedDate?: string | null;
     onDateSelect: (date: string) => void;

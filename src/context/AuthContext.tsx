@@ -25,26 +25,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Listen to authentication state changes
     const unsubscribe = authService.onAuthStateChanged((user) => {
       setUser(user);
       setLoading(false);
     });
-
-    // Cleanup subscription on unmount
     return () => unsubscribe();
   }, []);
 
   const signUp = async (email: string, password: string, displayName: string): Promise<AuthResult> => {
     setLoading(true);
     setError(null);
-    
     const result = await authService.signUp(email, password, displayName);
-    
     if (!result.success) {
       setError(result.error || 'Sign up failed');
     }
-    
     setLoading(false);
     return result;
   };
@@ -52,13 +46,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signIn = async (email: string, password: string): Promise<AuthResult> => {
     setLoading(true);
     setError(null);
-    
     const result = await authService.signIn(email, password);
-    
     if (!result.success) {
       setError(result.error || 'Sign in failed');
     }
-    
     setLoading(false);
     return result;
   };
@@ -66,13 +57,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signOut = async (): Promise<AuthResult> => {
     setLoading(true);
     setError(null);
-    
     const result = await authService.signOut();
-    
     if (!result.success) {
       setError(result.error || 'Sign out failed');
     }
-    
     setLoading(false);
     return result;
   };
